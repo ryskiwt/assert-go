@@ -10,14 +10,20 @@ func Do(ok bool) {
 	}
 }
 
+func Equals(want interface{}, got interface{}) {
+	if want != got {
+		panic(fmt.Sprintf("assertion error: want=%v, got=%v", want, got))
+	}
+}
+
 func WithMsg(ok bool, v ...interface{}) {
 	if !ok {
-		panic("assertion error: " + fmt.Sprint(v...))
+		panic(fmt.Sprint(v...))
 	}
 }
 
 func WithMsgf(ok bool, format string, v ...interface{}) {
 	if !ok {
-		panic("assertion error: " + fmt.Sprintf(format, v...))
+		panic(fmt.Sprintf(format, v...))
 	}
 }

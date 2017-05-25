@@ -2,8 +2,10 @@
 
 package assert
 
-func Do(b bool) {}
+func Do(ok bool) {}
 
-func WithMsg(b bool, v ...interface{}) {}
+func Equals(want interface{}, got interface{}) {}
 
-func WithMsgf(b bool, format string, v ...interface{}) {}
+func WithMsg(ok bool, v ...interface{}) {}
+
+func WithMsgf(ok bool, format string, v ...interface{}) {}

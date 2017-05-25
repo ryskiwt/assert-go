@@ -1,6 +1,6 @@
 ## Usage
 ```go
-import "pgithub.com/ryskiwt/assert-go"
+import "github.com/ryskiwt/assert-go"
 
 v := 1
 assert.Do(v == 0)

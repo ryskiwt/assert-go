@@ -3,7 +3,7 @@ package assert_test
 import (
 	"testing"
 
-	"pgithub.com/ryskiwt/assert-go"
+	"../assert-go"
 )
 
 func BenchmarkWithMsgf_True(b *testing.B) {

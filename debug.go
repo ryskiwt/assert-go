@@ -1,29 +1,27 @@
-// +build !release
+// +build assert
 
 package assert
 
-import "fmt"
+const ENABLED = true
 
 func Do(ok bool) {
 	if !ok {
-		panic("assertion error")
+		panic(DefaultMsg)
 	}
 }
 
-func Equals(want interface{}, got interface{}) {
-	if want != got {
-		panic(fmt.Sprintf("assertion error: want=%v, got=%v", want, got))
+func Equals(f func() (got G, want W)) {
+	got, want := f()
+
+	if got != want {
+		panic(NewMsg(got, want))
 	}
 }
 
-func WithMsg(ok bool, v ...interface{}) {
+func WithMsg(f func() (ok bool, msg string)) {
+	ok, msg := f()
+
 	if !ok {
-		panic(fmt.Sprint(v...))
-	}
-}
-
-func WithMsgf(ok bool, format string, v ...interface{}) {
-	if !ok {
-		panic(fmt.Sprintf(format, v...))
+		panic(msg)
 	}
 }

@@ -3,72 +3,84 @@
 import "github.com/ryskiwt/assert-go"
 
 v := 1
+
+// CASE 1 (about 0.33 ns/op)
+if assert.ENABLED && v == 0 {
+	panic(assert.DefaultMsg)
+}
+// -> panic: assrtion error
+
+
+// CASE 2 (about 0.33 ns/op)
 assert.Do(v == 0)
 // -> panic: assrtion error
 
-assert.Equals(v, 0)
+
+// CASE 3 (about 1.00 ns/op)
+assert.Equals(func() (assert.G, assert.W) { return v, 0 })
 // -> panic: assrtion error: got=1, want=0
 
-assert.WithMsg(v == 0, "invalid v")
-// -> panic: invalid v
 
-assert.WithMsgf(v == 0, "invalid v: got=%v, want=%v", v, 0)
-// -> panic: invalid v: got=1, want=0
+// CASE 4 (about 1.00 ns/op)
+assert.WithMsg(func() (bool, string) {
+	return v == 0, assert.NewMsg(v, 0)
+})
+// -> panic: assertion error: got=1, want=0
 ```
 
 ## Build
 
-### Build for Debug
+### assertion enabled
 ```sh
-$ go build
+$ go build -tags=assert
 ```
 
-### Build for Release
+### assertion disabled
 ```sh
-$ go build -tags=release
+$ go build
 ```
 
 ## Benchmark
 
 ```
-$ go test -run NONE -bench . -benchmem
+$ go test -run NONE -bench . -benchmem -tags=assert                                                                                                       +[develop]
 testing: warning: no tests to run
-BenchmarkNone-4             	2000000000	         0.37 ns/op	       0 B/op	       0 allocs/op
-BenchmarkDo_True-4          	2000000000	         1.96 ns/op	       0 B/op	       0 allocs/op
-BenchmarkEquals_True-4      	20000000	        58.7 ns/op	      16 B/op	       2 allocs/op
-BenchmarkWithMsg_True-4     	30000000	        43.2 ns/op	      16 B/op	       1 allocs/op
-BenchmarkWithMsgf_True-4    	30000000	        55.7 ns/op	      16 B/op	       2 allocs/op
-BenchmarkDo_False-4         	panic: assertion error
+BenchmarkNone-4            	2000000000	         0.31 ns/op	       0 B/op	       0 allocs/op
+BenchmarkFlag_True-4       	2000000000	         0.32 ns/op	       0 B/op	       0 allocs/op
+BenchmarkDo_True-4         	1000000000	         1.95 ns/op	       0 B/op	       0 allocs/op
+BenchmarkEquals_True-4     	30000000	        58.8 ns/op	      16 B/op	       2 allocs/op
+BenchmarkWithMsg_True-4    	 5000000	       335 ns/op	      64 B/op	       4 allocs/op
+BenchmarkDo_False-4        	panic: assertion error
 
-goroutine 33 [running]:
-panic(0xe5b40, 0xc420480000)
+goroutine 27 [running]:
+panic(0xe5c40, 0xc420490030)
 	/usr/local/Cellar/go/1.7.3/libexec/src/runtime/panic.go:500 +0x1a1
-github.com/ryskiwt/assert-go.Do(0x2b29800)
-	/path/to/repos/src/github.com/ryskiwt/assert-go/debug.go:11 +0x80
-github.com/ryskiwt/assert-go_test.BenchmarkDo_False(0xc42009e280)
-	/path/to/repos/src/github.com/ryskiwt/assert-go/benchmark_test.go:45 +0x3e
-testing.(*B).runN(0xc42009e280, 0x1)
+pgithub.com/ryskiwt/assert-go.Do(0x16fedc00)
+	/path/to/repos/src/github.com/ryskiwt/assert-go/debug.go:9 +0x80
+pgithub.com/ryskiwt/assert-go_test.BenchmarkDo_False(0xc4200ac280)
+	/path/to/repos/src/github.com/ryskiwt/assert-go/benchmark_test.go:47 +0x3e
+testing.(*B).runN(0xc4200ac280, 0x1)
 	/usr/local/Cellar/go/1.7.3/libexec/src/testing/benchmark.go:139 +0xaa
-testing.(*B).run1.func1(0xc42009e280)
+testing.(*B).run1.func1(0xc4200ac280)
 	/usr/local/Cellar/go/1.7.3/libexec/src/testing/benchmark.go:208 +0x5a
 created by testing.(*B).run1
 	/usr/local/Cellar/go/1.7.3/libexec/src/testing/benchmark.go:209 +0x7f
 exit status 2
-FAIL	github.com/ryskiwt/assert-go	9.256s
+FAIL	github.com/ryskiwt/assert-go	7.332s
 ```
 
 ```
-$ go test -run NONE -bench . -benchmem -tags=release
+$ go test -run NONE -bench . -benchmem                                                                                                                    +[develop]
 testing: warning: no tests to run
-BenchmarkNone-4             	2000000000	         0.32 ns/op	       0 B/op	       0 allocs/op
-BenchmarkDo_True-4          	2000000000	         0.32 ns/op	       0 B/op	       0 allocs/op
-BenchmarkEquals_True-4      	100000000	        15.7 ns/op	       0 B/op	       0 allocs/op
-BenchmarkWithMsg_True-4     	100000000	        13.7 ns/op	       0 B/op	       0 allocs/op
-BenchmarkWithMsgf_True-4    	100000000	        19.8 ns/op	       0 B/op	       0 allocs/op
-BenchmarkDo_False-4         	2000000000	         0.32 ns/op	       0 B/op	       0 allocs/op
-BenchmarkEquals_False-4     	100000000	        14.9 ns/op	       0 B/op	       0 allocs/op
-BenchmarkWithMsg_False-4    	100000000	        13.7 ns/op	       0 B/op	       0 allocs/op
-BenchmarkWithMsgf_False-4   	100000000	        19.6 ns/op	       0 B/op	       0 allocs/op
+BenchmarkNone-4            	2000000000	         0.31 ns/op	       0 B/op	       0 allocs/op // no assertion
+BenchmarkFlag_True-4       	2000000000	         0.33 ns/op	       0 B/op	       0 allocs/op // fastest
+BenchmarkDo_True-4         	2000000000	         0.31 ns/op	       0 B/op	       0 allocs/op // fastest
+BenchmarkEquals_True-4     	2000000000	         1.01 ns/op	       0 B/op	       0 allocs/op // 3 times slower
+BenchmarkWithMsg_True-4    	2000000000	         0.96 ns/op	       0 B/op	       0 allocs/op // 3 times slower
+BenchmarkDo_False-4        	2000000000	         0.32 ns/op	       0 B/op	       0 allocs/op
+BenchmarkFlag_False-4      	2000000000	         0.31 ns/op	       0 B/op	       0 allocs/op
+BenchmarkEquals_False-4    	2000000000	         1.11 ns/op	       0 B/op	       0 allocs/op
+BenchmarkWithMsg_False-4   	2000000000	         1.03 ns/op	       0 B/op	       0 allocs/op
 PASS
-ok  	github.com/ryskiwt/assert-go	11.903s
+ok  	github.com/ryskiwt/assert-go	12.039s
 ```

@@ -3,11 +3,20 @@ package assert_test
 import (
 	"testing"
 
-	"../assert-go"
+	assert "../assert-go"
 )
 
 func BenchmarkNone(b *testing.B) {
 	for i := 0; i < b.N; i++ {
+	}
+}
+
+func BenchmarkFlag_True(b *testing.B) {
+	v := 1
+	for i := 0; i < b.N; i++ {
+		if assert.ENABLED && v != 1 {
+			panic(assert.NewMsg(v, 1))
+		}
 	}
 }
 
@@ -21,21 +30,14 @@ func BenchmarkDo_True(b *testing.B) {
 func BenchmarkEquals_True(b *testing.B) {
 	v := 1
 	for i := 0; i < b.N; i++ {
-		assert.Equals(v, 1)
+		assert.Equals(func() (assert.G, assert.W) { return v, 1 })
 	}
 }
 
 func BenchmarkWithMsg_True(b *testing.B) {
 	v := 1
 	for i := 0; i < b.N; i++ {
-		assert.WithMsg(v == 1, "assertion error")
-	}
-}
-
-func BenchmarkWithMsgf_True(b *testing.B) {
-	v := 1
-	for i := 0; i < b.N; i++ {
-		assert.WithMsgf(v == 1, "assertion error: want=%v, got=%v", 1, v)
+		assert.WithMsg(func() (bool, string) { return v == 1, assert.NewMsg(v, 1) })
 	}
 }
 
@@ -46,23 +48,25 @@ func BenchmarkDo_False(b *testing.B) {
 	}
 }
 
+func BenchmarkFlag_False(b *testing.B) {
+	v := 1
+	for i := 0; i < b.N; i++ {
+		if assert.ENABLED && v != 0 {
+			panic(assert.NewMsg(v, 1))
+		}
+	}
+}
+
 func BenchmarkEquals_False(b *testing.B) {
 	v := 1
 	for i := 0; i < b.N; i++ {
-		assert.Equals(v, 0)
+		assert.Equals(func() (assert.G, assert.W) { return v, 0 })
 	}
 }
 
 func BenchmarkWithMsg_False(b *testing.B) {
 	v := 1
 	for i := 0; i < b.N; i++ {
-		assert.WithMsg(v == 0, "assertion error")
-	}
-}
-
-func BenchmarkWithMsgf_False(b *testing.B) {
-	v := 1
-	for i := 0; i < b.N; i++ {
-		assert.WithMsgf(v == 0, "assertion error: want=%v, got=%v", 1, v)
+		assert.WithMsg(func() (bool, string) { return v == 0, assert.NewMsg(v, 0) })
 	}
 }

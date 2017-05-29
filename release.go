@@ -1,11 +1,11 @@
-// +build release
+// +build !assert
 
 package assert
 
+const ENABLED = false
+
 func Do(ok bool) {}
 
-func Equals(want interface{}, got interface{}) {}
+func Equals(func() (got G, want W)) {}
 
-func WithMsg(ok bool, v ...interface{}) {}
-
-func WithMsgf(ok bool, format string, v ...interface{}) {}
+func WithMsg(func() (ok bool, msg string)) {}
